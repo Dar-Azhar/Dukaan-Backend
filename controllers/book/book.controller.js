@@ -8,7 +8,9 @@ const createNewBook = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ status: 'error', message: 'Cover image is required' });
         }
-        const coverImageUrl = `${req.protocol}://${req.get('host')}/uploads/images/${req.file.filename}`;
+        // const coverImageUrl = `${req.protocol}://${req.get('host')}/uploads/images/${req.file.filename}`;
+        // Use the secure URL from Cloudinary
+        const coverImageUrl = req.file.path || req.file.secure_url;
         // Create the new book object
         const newBook = new Book({
             title,
@@ -60,7 +62,18 @@ const getSingleBook = async (req, res) => {
 const updateBook = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedBook = await Book.findByIdAndUpdate(id, req.body, { new: true });
+        const updates = { ...req.body };
+
+        // Check if a new file is uploaded
+        // Handle file upload if provided
+        if (req.file) {
+            // Ensure `coverImage` is a string (e.g., file path or secure URL)
+            updates.coverImage = req.file.path || req.file.secure_url;
+        } else {
+            // Remove `coverImage` from updates if no file is provided
+            delete updates.coverImage;
+        }
+        const updatedBook = await Book.findByIdAndUpdate(id, updates, { new: true });
         if (!updatedBook) {
             return res.status(404).json({ status: 'error', message: 'No book found' });
         }
