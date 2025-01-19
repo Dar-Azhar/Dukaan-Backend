@@ -22,11 +22,11 @@ const bookSchema = new mongoose.Schema({
         required: true
     },
     oldPrice :{
-        type: String,
+        type: Number,
         required: true
     },
     newPrice:{
-        type: String,
+        type: Number,
         required: true
     }
 }, {timestamps: true});
